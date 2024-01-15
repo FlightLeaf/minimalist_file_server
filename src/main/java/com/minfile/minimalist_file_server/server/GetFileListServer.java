@@ -11,7 +11,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class GetFileListServer {
-    public void start(int port,String downloadPathStr) throws IOException {
+    public void start(int port, String downloadPathStr) throws IOException {
         // 创建对象
         ServerSocket ss = new ServerSocket(port);
         while (true) {
@@ -25,12 +25,8 @@ public class GetFileListServer {
             String fileListString = convertFileListToJson(files);
 
             // 发送文件列表给客户端
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            bw.write(fileListString);
-            bw.newLine();
-            bw.flush();
+            sendFileListToClient(socket, fileListString);
 
-            bw.close();
             socket.close();
         }
     }
@@ -50,5 +46,13 @@ public class GetFileListServer {
             jsonArray.put(jsonObject);
         }
         return jsonArray.toString();
+    }
+
+    private static void sendFileListToClient(Socket socket, String fileListString) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        bw.write(fileListString);
+        bw.newLine();
+        bw.flush();
+        bw.close();
     }
 }

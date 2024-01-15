@@ -4,6 +4,7 @@ import com.minfile.minimalist_file_server.server.DeleteFileServer;
 import com.minfile.minimalist_file_server.server.DownloadFileServer;
 import com.minfile.minimalist_file_server.server.GetFileListServer;
 import com.minfile.minimalist_file_server.server.UploadFileServer;
+import com.minfile.minimalist_file_server.utils.PortUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -32,13 +33,13 @@ public class HelloController implements Initializable {
     private TextField getFileListPort;
 
     @FXML
+    private TextField uploadFilePort;
+
+    @FXML
     private Button selectPathBtn;
 
     @FXML
     private Button startBtn;
-
-    @FXML
-    private TextField uploadFilePort;
 
     String downloadPathStr = "";
 
@@ -69,6 +70,11 @@ public class HelloController implements Initializable {
             alert.setContentText("请先选择下载路径");
             alert.showAndWait();
         }else{
+            boolean deleteFilePortFlag = PortUtils.isPortInUse(Integer.parseInt(deleteFilePath.getText()));
+            boolean downloadFilePortFlag = PortUtils.isPortInUse(Integer.parseInt(downloadFilePort.getText()));
+            boolean getFileListPortFlag = PortUtils.isPortInUse(Integer.parseInt(getFileListPort.getText()));
+            boolean uploadFilePortFlag = PortUtils.isPortInUse(Integer.parseInt(uploadFilePort.getText()));
+            System.out.println(deleteFilePortFlag+" "+downloadFilePortFlag+" "+getFileListPortFlag+" "+uploadFilePortFlag);
             try {
                 // 创建文件传输服务器线程
                 Thread fileTransferServerThread = new Thread(() -> {
@@ -121,6 +127,7 @@ public class HelloController implements Initializable {
                     fileTransferServerThread.start();
                     fileLinkedListServerThread.start();
                     fileDowmloadServerThread.start();
+                    selectPathBtn.setVisible(false);
                 }else {
                     startBtn.setText("启动服务器");
                     fileDeleteServerThread.interrupt();

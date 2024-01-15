@@ -6,53 +6,50 @@ import java.io.File;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.io.IOException;
 
 public class DeleteFileServer extends ServerSocket {
 
     private DataInputStream dis;
 
-    public DeleteFileServer(int port) throws Exception {
+    public DeleteFileServer(int port) throws IOException {
         super(port);
     }
 
-    public void deleteFileServerLoad() throws Exception {
-        while (true){
+    public void deleteFileServerLoad() throws IOException, InterruptedException {
+        while (true) {
             Socket deleteFileServer = this.accept();
             try {
                 dis = new DataInputStream(deleteFileServer.getInputStream());
                 String filePath = dis.readUTF();
 
-                System.out.println(filePath);
-                // 删除文件
-                boolean deleteState = deleteFiles(filePath);
-                // 反馈文件是否删除成功
-                OutputStream outToClient = deleteFileServer.getOutputStream();
-                DataOutputStream out = new DataOutputStream(outToClient);
-                out.writeUTF(String.valueOf(deleteState));
-
-                System.out.println("======== 删除成功 [File Name：" + filePath + "] =============");
-            } catch (Exception e) {
+                boolean deleteSuccess = deleteFiles(filePath);
+                sendDeleteResponse(deleteFileServer, deleteSuccess);
+            } catch (IOException e) {
                 e.printStackTrace();
             } finally {
                 try {
-                    if(dis != null)
+                    if (dis != null) {
                         dis.close();
+                    }
                     deleteFileServer.close();
-                } catch (Exception e) {}
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
-
     }
 
-    public boolean deleteFiles(String pathName){
-        boolean flag = false;
-        // 根据路径创建文件对象
+    private void sendDeleteResponse(Socket socket, boolean success) throws IOException {
+        OutputStream outToClient = socket.getOutputStream();
+        DataOutputStream out = new DataOutputStream(outToClient);
+        out.writeUTF(String.valueOf(success));
+        out.flush();
+        socket.close();
+    }
+
+    public boolean deleteFiles(String pathName) {
         File file = new File(pathName);
-        // 路径是个文件且不为空时删除文件
-        if(file.isFile()&&file.exists()){
-            flag = file.delete();
-        }
-        // 删除失败时，返回false
-        return flag;
+        return file.isFile() && file.exists() && file.delete();
     }
 }

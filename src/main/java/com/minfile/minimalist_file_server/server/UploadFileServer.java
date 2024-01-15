@@ -42,10 +42,8 @@ public class UploadFileServer extends ServerSocket {
                 String fileName = dis.readUTF();
                 long fileLength = dis.readLong();
                 //服务器储存的地址
-                File directory = new File("C:\\Users\\Administrator\\Desktop\\target");
-                if(!directory.exists()) {
-                    directory.mkdir();
-                }
+                File directory = new File(downloadPathStr);
+
                 File file = new File(directory.getAbsolutePath() + File.separatorChar + fileName);
                 fos = new FileOutputStream(file);
 
